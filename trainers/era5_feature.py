@@ -35,6 +35,7 @@ class ERA5_feature():
         self.var_batch_loss = {'train': [], 'val': [], 'test': []}
         self.rec_batch_loss = {'train': [], 'val': [], 'test': []}
         self.rec_epoch_loss_history = {'train': [], 'val': [], 'test': []}
+        self.var_epoch_loss_history = {'train': [], 'val': [], 'test': []}
 
         self.SAVE_DIR = os.path.join(self.dataloader_params.root_path, 'loss', feat_name)
         os.makedirs(self.SAVE_DIR, exist_ok=True)
@@ -105,8 +106,11 @@ class ERA5_feature():
 
     def append_loss(self):
         for split in ['train', 'val', 'test']:
-            loss = sum(self.rec_batch_loss[split]) / len(self.rec_batch_loss[split])
-            self.rec_epoch_loss_history[split].append(loss)
+            loss_rec = sum(self.rec_batch_loss[split]) / len(self.rec_batch_loss[split])
+            self.rec_epoch_loss_history[split].append(loss_rec)
+            if self.model_params.use_VAE:
+                loss_var = sum(self.var_batch_loss[split]) / len(self.var_batch_loss[split])
+                self.var_epoch_loss_history[split].append(loss_var)
             self.init_loss(split)
 
     def plot(self, x, coords):
@@ -114,15 +118,20 @@ class ERA5_feature():
         self.plot_random_reconstruction(x, coords)
 
     def plot_loss(self):
-        for split in ['train', 'val', 'test']:
-            plt.plot(self.rec_epoch_loss_history[split], label=split)
-        plt.ylabel('reconstruction loss')
-        plt.xlabel('epoch')
-        plt.legend()
-        plt.grid()
-        plt.tight_layout()
-        plt.savefig(os.path.join(self.SAVE_DIR, 'loss.png'))
-        plt.close()
+        tags = ['rec', 'var'] if self.model_params.use_VAE else ['rec']
+        for tag in tags:
+            for split in ['train', 'val', 'test']:
+                if tag == 'rec':
+                    plt.plot(self.rec_epoch_loss_history[split], label=split)
+                else:
+                    plt.plot(self.var_epoch_loss_history[split], label=split)
+            plt.ylabel('{} loss'.format(tag))
+            plt.xlabel('epoch')
+            plt.legend()
+            plt.grid()
+            plt.tight_layout()
+            plt.savefig(os.path.join(self.SAVE_DIR, 'loss_{}.png'.format(tag)))
+            plt.close()
 
     def plot_random_reconstruction(self, x, time_seq):
         self.eval()

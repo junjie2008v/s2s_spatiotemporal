@@ -136,7 +136,7 @@ class Trainer(object):
                  'model_params': vars(self.model_params),
                  'trainer_params': vars(self.trainer_params)}
 
-        wandb.init(name=self.wandb_name, entity='nishant-parashar', project='s2s_forecasting', config=config)
+        wandb.init(name=self.wandb_name, entity=self.trainer_params.wandb_entity, project='s2s_forecasting', config=config)
         wandb.watch(self.temporal_model)
 
         lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer,\

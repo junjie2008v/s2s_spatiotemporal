@@ -135,7 +135,7 @@ class Trainer(object):
                  'model_params': vars(self.model_params),
                  'trainer_params': vars(self.trainer_params)}
 
-        wandb.init(name=self.wandb_name, entity='nishant-parashar', project='s2s_forecasting', config=config)
+        wandb.init(name=self.wandb_name, entity=self.trainer_params.wandb_entity, project='s2s_forecasting', config=config)
         wandb.watch(self.temporal_model)
 
         lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau (
@@ -158,12 +158,31 @@ class Trainer(object):
 
             self._display_epoch_loss(train_loss, val_loss, test_loss)
 
-            loss_dict = {
+
+            # Log reconstruction & variational losses
+            for key, era5_feat in self.spatial_embedding_dict.items():
+                loss_rec_feat = {
+                    split+'_rec_'+key: era5_feat.rec_epoch_loss_history[split][-1]
+                    for split in ['train', 'val', 'test']
+                }
+                loss_rec_feat['epoch'] = epoch
+                wandb.log(loss_rec_feat)
+
+                if self.model_params.use_VAE:
+                    loss_var_feat = {
+                        split+'_var_'+key: era5_feat.var_epoch_loss_history[split][-1]
+                        for split in ['train', 'val', 'test']
+                    }
+                    loss_var_feat['epoch'] = epoch
+                    wandb.log(loss_var_feat)
+            
+            loss_tcn = {
+                'epoch': epoch,
                 'train_loss': train_loss['tcn'],
                 'val_loss': val_loss['tcn'],
                 'test_loss': test_loss['tcn']
             }
-            wandb.log(loss_dict)
+            wandb.log(loss_tcn)
 
             for feat in self.ERA5_features_list:
                 self.spatial_embedding_dict[feat].step_lr_scheduler(split='val')
@@ -306,7 +325,6 @@ class Trainer(object):
 
         if loss == False:
             return y_pred
-
         loss_var = [emb['var_loss'] for emb in emb_dict.values()]
         loss_rec = [emb['rec_loss'] for emb in emb_dict.values()]
 
