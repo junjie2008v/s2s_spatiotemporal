@@ -48,6 +48,6 @@ except ImportError:
 ```
 ## Instructions
 ### Running the code
-python3 main.py --len_inp_time_series 12 --len_out_time_series 4 --stride_time_series 1 --delta_time_series 7 --batch_size 32 --spatial_embedding_dim 10
+python main.py --len_inp_time_series 12 --len_out_time_series 4 --stride_time_series 1 --delta_time_series 7 --batch_size 32 --spatial_embedding_dim 10
 
 NOTE: refer to misc/args.py for list of acceptable arguments

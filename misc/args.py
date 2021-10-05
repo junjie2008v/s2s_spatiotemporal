@@ -142,7 +142,7 @@ def trainer_params():
     # Logging specific arguments
     parser.add_argument('--save_interval', type=int, default=10,
                         help="running test loop after every test_interval epochs")
-    parser.add_argument('--wandb_entity', type=str, default='nishant.parashar',
+    parser.add_argument('--wandb_entity', type=str, default='rsaha',
                         help="individual experimental logging")
 
     opt,_ = parser.parse_known_args()
