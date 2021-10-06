@@ -65,17 +65,21 @@ class Trainer(object):
 
         # Define logger
         if self.trainer_params.operating_mode == 'train':
-            self.root_path, self.log_path, self.wandb_name = get_log_paths(self.trainer_params.run,\
-                                                                      'TCN',\
-                                                                      'NN_embedding')
+            self.root_path, self.log_path, self.wandb_name = get_log_paths (
+                run = self.trainer_params.run,
+                model_name = 'TCN',
+                feature_type = 'NN_embedding'
+            )
         elif self.trainer_params.operating_mode == 'load':
             if self.trainer_params.ckpt_timestamp == None:
                 raise Exception("please provide trainer_params.ckpt_timestamp")
             else:
-                self.root_path, self.log_path, _ = get_log_paths(self.trainer_params.run, \
-                                                            'TCN',\
-                                                            'NN_embedding',\
-                                                            self.trainer_params.ckpt_timestamp)
+                self.root_path, self.log_path, _ = get_log_paths (
+                    run = self.trainer_params.run,
+                    model_name = 'TCN',
+                    feature_type = 'NN_embedding',
+                    ckpt_timestamp = self.trainer_params.ckpt_timestamp
+                )
 
         os.makedirs(os.path.join(self.log_path, 'spatial'), exist_ok=True)
         print('-'*90)
